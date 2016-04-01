@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"bytes"
+	"time"
+	"math/rand"
 )
 
 // Equity representing one stock
@@ -31,6 +33,18 @@ type Order struct {
 	Value float64
 }
 
+func (o Order) String() string {
+	var orderTypeString string
+
+	if o.OrderType == BuyOrderType {
+		orderTypeString = "Buy"
+	} else {
+		orderTypeString = "Sell"
+	}
+
+	return fmt.Sprintf("%v: %v shares of %v at $%v", orderTypeString, o.Shares, o. Symbol, o.Value)
+}
+
 // Establish the market
 type Market struct {
 	Stocks map[string]Stock
@@ -48,6 +62,15 @@ func (m Market) String() string {
 	}
 
 	return marketOutput.String()
+}
+
+// The symbols in the market
+func (m Market) Symbols() []string {
+	keys := make([]string, 0)
+	for k, _ := range m.Stocks {
+		keys = append(keys, k)
+	}
+	return keys	
 }
 
 // Populate the market with some fake data
@@ -73,8 +96,32 @@ func initializeMarket() (Market, error) {
 	return market, nil
 }
 
+func generateOrders(n int, m Market, orderChannel chan Order) {
+	// Randomly sleep between orders
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < n; i++ {
+		// Create a new order for a random stock with a random price
+		symbols := m.Symbols()
+		orderChannel <- Order{symbols[rand.Intn(len(symbols))], BuyOrderType, 100, 64.5}
+
+		time.Sleep(time.Duration(rand.Intn(2000)) * time.Millisecond)
+	}
+	close(orderChannel)
+}
+
+func startTrading(m *Market) {
+	marketActivity := make(chan Order)
+
+	go generateOrders(10, *m, marketActivity)
+	for ord := range marketActivity {
+		fmt.Printf("Got an order: %v\n", ord)
+	}
+}
+
 func main() {
 	market, _ := initializeMarket()
-
 	fmt.Println(market)
+
+	startTrading(&market)
 }

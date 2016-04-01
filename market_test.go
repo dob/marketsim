@@ -28,3 +28,26 @@ func TestInitializeMarket(t *testing.T) {
 	}
 }
 
+func TestMarketSymbols(t *testing.T) {
+	var market Market
+	stubMarketStocks(&market)
+	syms := market.Symbols()
+
+	if len(syms) != 3 {
+		t.Errorf("The symbols extraction only extracted %v symbols", len(syms))
+	}
+}
+
+func TestOrderPrintingBuy(t *testing.T) {
+	o := Order{"AMZN", BuyOrderType, 20, 45}
+	if o.String() != "Buy: 20 shares of AMZN at $45" {
+		t.Errorf("Got a bad buy string: %v", o.String())
+	}
+}
+
+func TestOrderPrintingSell(t *testing.T) {
+	o := Order{"AMZN", SellOrderType, 20, 45}
+	if o.String() != "Sell: 20 shares of AMZN at $45" {
+		t.Errorf("Got a bad sell string: %v", o.String())
+	}
+}
