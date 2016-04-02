@@ -6,8 +6,8 @@ import (
 
 // Establish the market
 type Market struct {
-	Stocks map[string]Stock
-	Orders []Order
+	Stocks map[string]*Stock
+	Orders []*Order
 }
 
 func (m Market) String() string {
@@ -24,7 +24,7 @@ func (m Market) String() string {
 }
 
 // The symbols in the market
-func (m Market) Symbols() []string {
+func (m *Market) Symbols() []string {
 	keys := make([]string, 0)
 	for k, _ := range m.Stocks {
 		keys = append(keys, k)
