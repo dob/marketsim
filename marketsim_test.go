@@ -1,9 +1,13 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/dob/marketsim/shared/datatypes"
+)
 
 func TestStubMarketStocks(t *testing.T) {
-	var market Market
+	var market dt.Market
 	stubMarketStocks(&market)
 
 	numberOfStocks := len(market.Stocks)
@@ -29,7 +33,7 @@ func TestInitializeMarket(t *testing.T) {
 }
 
 func TestMarketSymbols(t *testing.T) {
-	var market Market
+	var market dt.Market
 	stubMarketStocks(&market)
 	syms := market.Symbols()
 
@@ -39,15 +43,27 @@ func TestMarketSymbols(t *testing.T) {
 }
 
 func TestOrderPrintingBuy(t *testing.T) {
-	o := Order{"AMZN", BuyOrderType, 20, 45}
-	if o.String() != "Buy: 20 shares of AMZN at $45" {
-		t.Errorf("Got a bad buy string: %v", o.String())
+	o := dt.Order{"AMZN", dt.BuyOrderType, dt.LimitOrderType, 20, 45}
+	if o.String() != "Buy: 20 shares of AMZN at $45. Limit order." {
+		t.Errorf("Got a bad buy string: %v.", o.String())
 	}
 }
 
 func TestOrderPrintingSell(t *testing.T) {
-	o := Order{"AMZN", SellOrderType, 20, 45}
-	if o.String() != "Sell: 20 shares of AMZN at $45" {
+	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45}
+	if o.String() != "Sell: 20 shares of AMZN at $45. Limit order." {
 		t.Errorf("Got a bad sell string: %v", o.String())
+	}
+}
+
+func TestOrderTypeString(t *testing.T) {
+	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45}
+	if o.OrderType.String() != "Limit" {
+		t.Errorf("Got a bad order type string")
+	}
+
+	o = dt.Order{"AMZN", dt.SellOrderType, dt.MarketOrderType, 20, 45}
+	if o.OrderType.String() != "Market" {
+		t.Errorf("Got a bad order type string")
 	}
 }
