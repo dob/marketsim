@@ -14,13 +14,13 @@ import (
 func stubMarketStocks(m *dt.Market) {
 	m.Stocks = make(map[string]*dt.Stock)
 
-	sym1 := dt.Stock{"AMZN", "Amazon", 568.2, 568.4}
+	sym1 := dt.Stock{"AMZN", "Amazon", dt.StockPrice{568.2, 568.4}}
 	m.Stocks[sym1.Symbol] = &sym1
 
-	sym2 := dt.Stock{"TSLA", "Tesla Motors", 288.5, 289}
+	sym2 := dt.Stock{"TSLA", "Tesla Motors", dt.StockPrice{288.5, 289}}
 	m.Stocks[sym2.Symbol] = &sym2
 
-	sym3 := dt.Stock{"TWTR", "Twitter", 15.4, 15.60}
+	sym3 := dt.Stock{"TWTR", "Twitter", dt.StockPrice{15.4, 15.60}}
 	m.Stocks[sym3.Symbol] = &sym3
 }
 

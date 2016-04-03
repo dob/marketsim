@@ -10,6 +10,7 @@ type Market struct {
 	Orders []*Order
 }
 
+
 func (m Market) String() string {
 	var marketOutput bytes.Buffer
 

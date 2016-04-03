@@ -8,12 +8,11 @@ import (
 type Stock struct {
 	Symbol string
 	Name string
-	Bid float64
-	Offer float64
+	Price StockPrice
 }
 
 func (s Stock) String() string {
-	return fmt.Sprintf("%v, %v: %v-%v", s.Symbol, s.Name, s.Bid, s.Offer)
+	return fmt.Sprintf("%v, %v: %v-%v", s.Symbol, s.Name, s.Price.Bid, s.Price.Offer)
 }
 
 
