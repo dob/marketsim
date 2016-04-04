@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"sort"
+	"log"
 )
 
 // Establish the market
@@ -44,17 +45,18 @@ func (m *Market) Symbols() []StockSymbol {
 
 var InvalidOrder = errors.New("Invalid order")
 
-func (m *Market) ReceiveOrder(o Order) error {
+func (m *Market) ReceiveOrder(o *Order) error {
 	// Check for errors
 	if o.Shares < 1 {
 		return InvalidOrder
 	}
 
 	// Put the order into the market
-	m.Orders[o.Symbol] = append(m.Orders[o.Symbol], &o)
+	m.Orders[o.Symbol] = append(m.Orders[o.Symbol], o)
+	log.Printf("Adding order: %v\n", o)
 
 	// Process the order
-	m.processOrder(&o)
+	m.processOrder(o)
 	
 	// Update the price of the stock represented by the order o
 	m.updatePriceForSymbol(o.Symbol)
@@ -86,7 +88,7 @@ func (m *Market) processLimitOrder(o *Order) {
 		if sharesOutstanding <= candidateOrder.Shares {
 			// fullfill the full order and part of the candidate order
 			m.fullfillOrder(o, sharesOutstanding, candidateOrder.Value)
-			m.fullfillOrder(candidateOrder, candidateOrder.Shares - sharesOutstanding, candidateOrder.Value)
+			m.fullfillOrder(candidateOrder, sharesOutstanding, candidateOrder.Value)
 			sharesOutstanding = 0
 			break
 		} else {
@@ -107,7 +109,7 @@ func (m *Market) processMarketOrder(o *Order) {
 		if sharesOutstanding <= candidateOrder.Shares {
 			// fullfill the full order and part of the candidate order
 			m.fullfillOrder(o, sharesOutstanding, candidateOrder.Value)
-			m.fullfillOrder(candidateOrder, candidateOrder.Shares - sharesOutstanding, candidateOrder.Value)
+			m.fullfillOrder(candidateOrder, sharesOutstanding, candidateOrder.Value)
 			sharesOutstanding = 0
 			break
 		} else {
@@ -157,6 +159,9 @@ func (m *Market) removeOrder(o *Order) {
 	for i, ords := range ordersForSymbol {
 		if ords == o {
 			ordersForSymbol = append(ordersForSymbol[:i], ordersForSymbol[i+1:]...)
+			m.Orders[o.Symbol] = ordersForSymbol
+			log.Printf("Removing order %v and now there are %v", o, len(ordersForSymbol))
+
 			break
 		}
 	}
@@ -167,7 +172,7 @@ func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	stock := m.Stocks[ss]
 	orders := m.Orders[ss]
 
-	maxBid := -1.0
+	maxBid := 0.0
 	minOffer := math.MaxFloat64
 
 	for _, o := range orders {
