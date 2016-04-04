@@ -4,9 +4,11 @@ import (
 	"fmt"
 )
 
+type StockSymbol string
+
 // Equity representing one stock
 type Stock struct {
-	Symbol string
+	Symbol StockSymbol
 	Name string
 	Price StockPrice
 }

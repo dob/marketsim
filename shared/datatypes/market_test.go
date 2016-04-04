@@ -17,7 +17,8 @@ func TestMain(m *testing.M) {
 
 func setup() {
 	m = Market{}
-	m.Stocks = make(map[string]*Stock)
+	m.Stocks = make(map[StockSymbol]*Stock)
+	m.Orders = make(map[StockSymbol][]*Order)
 	m.Stocks["AMZN"] = &Stock{"AMZN", "Amazon", StockPrice{}}
 	m.Stocks["TSLA"] = &Stock{"TSLA", "Tesla", StockPrice{}}
 	m.Stocks["TWTR"] = &Stock{"TWTR", "Twitter", StockPrice{}}

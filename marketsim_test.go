@@ -7,8 +7,8 @@ import (
 )
 
 func TestStubMarketStocks(t *testing.T) {
-	var market dt.Market
-	stubMarketStocks(&market)
+	var market *dt.Market = dt.InitializeMarket()
+	stubMarketStocks(market)
 
 	numberOfStocks := len(market.Stocks)
 	if numberOfStocks != 3 {
@@ -16,8 +16,8 @@ func TestStubMarketStocks(t *testing.T) {
 	}
 }
 
-func TestInitializeMarket(t *testing.T) {
-	market, err := initializeMarket()
+func TestInitializeMarketWithStocks(t *testing.T) {
+	market, err := initializeMarketWithStocks()
 
 	if (err != nil) {
 		t.Errorf("Got an error creating the market: %v", err)
@@ -33,8 +33,8 @@ func TestInitializeMarket(t *testing.T) {
 }
 
 func TestMarketSymbols(t *testing.T) {
-	var market dt.Market
-	stubMarketStocks(&market)
+	market := dt.InitializeMarket()
+	stubMarketStocks(market)
 	syms := market.Symbols()
 
 	if len(syms) != 3 {

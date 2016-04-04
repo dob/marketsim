@@ -6,7 +6,7 @@ import (
 
 // Represents an order to buy or sell
 type Order struct {
-	Symbol string
+	Symbol StockSymbol
 	BuySell OrderBuySellVal
 	OrderType OrderTypeVal
 	Shares int

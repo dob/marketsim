@@ -9,10 +9,16 @@ import (
 
 // Establish the market
 type Market struct {
-	Stocks map[string]*Stock
-	Orders []*Order
+	Stocks map[StockSymbol]*Stock
+	Orders map[StockSymbol][]*Order
 }
 
+func InitializeMarket() *Market {
+	m := &Market{}
+	m.Stocks = make(map[StockSymbol]*Stock)
+	m.Orders = make(map[StockSymbol][]*Order)
+	return m
+}
 
 func (m Market) String() string {
 	var marketOutput bytes.Buffer
@@ -28,8 +34,8 @@ func (m Market) String() string {
 }
 
 // The symbols in the market
-func (m *Market) Symbols() []string {
-	keys := make([]string, 0)
+func (m *Market) Symbols() []StockSymbol {
+	keys := make([]StockSymbol, 0)
 	for k, _ := range m.Stocks {
 		keys = append(keys, k)
 	}
@@ -45,13 +51,13 @@ func (m *Market) ReceiveOrder(o Order) error {
 	}
 
 	// Put the order into the market
-	m.Orders = append(m.Orders, &o)
+	m.Orders[o.Symbol] = append(m.Orders[o.Symbol], &o)
 
 	// Process the order
 	m.processOrder(&o)
 	
 	// Update the price of the stock represented by the order o
-	m.updatePriceForOrder(o)
+	m.updatePriceForSymbol(o.Symbol)
 	return nil
 }
 
@@ -65,7 +71,31 @@ func (m *Market) processOrder(o *Order) {
 }
 
 func (m *Market) processLimitOrder(o *Order) {
-	
+	sharesOutstanding := o.Shares
+	potentialOrders := m.getOrdersOnOtherSide(o)
+
+	// Find the highest or lowest prices and fulfill the orders
+	for _, candidateOrder := range potentialOrders {
+		if (o.BuySell == BuyOrderType && candidateOrder.Value > o.Value) ||
+			(o.BuySell == SellOrderType && candidateOrder.Value < o.Value) {
+			// The offer doesn't match the limit criteria so abort and
+			// leave this offer around
+			break
+		}
+		
+		if sharesOutstanding <= candidateOrder.Shares {
+			// fullfill the full order and part of the candidate order
+			m.fullfillOrder(o, sharesOutstanding, candidateOrder.Value)
+			m.fullfillOrder(candidateOrder, candidateOrder.Shares - sharesOutstanding, candidateOrder.Value)
+			sharesOutstanding = 0
+			break
+		} else {
+			// partially fullfill the order and continue to the next order
+			m.fullfillOrder(o, candidateOrder.Shares, candidateOrder.Value)
+			m.fullfillOrder(candidateOrder, candidateOrder.Shares, candidateOrder.Value)
+			sharesOutstanding -= candidateOrder.Shares
+		}
+	}	
 }
 
 func (m *Market) processMarketOrder(o *Order) {
@@ -90,9 +120,10 @@ func (m *Market) processMarketOrder(o *Order) {
 }
 
 func (m *Market) getOrdersOnOtherSide(o *Order) []*Order {
+	// Make a copy of the potential orders so we can sort
 	potentialOrders := make([]*Order, 0)
 
-	for _, potentialOrder := range m.Orders {
+	for _, potentialOrder := range m.Orders[o.Symbol] {
 		if o.Symbol == potentialOrder.Symbol &&
 			o.BuySell != potentialOrder.BuySell {
 			potentialOrders = append(potentialOrders, potentialOrder)
@@ -122,30 +153,32 @@ func (m *Market) fullfillOrder(o *Order, shares int, price float64) {
 }
 
 func (m *Market) removeOrder(o *Order) {
-	for i, ords := range m.Orders {
+	ordersForSymbol := m.Orders[o.Symbol]
+	for i, ords := range ordersForSymbol {
 		if ords == o {
-			m.Orders = append(m.Orders[:i], m.Orders[i+1:]...)
+			ordersForSymbol = append(ordersForSymbol[:i], ordersForSymbol[i+1:]...)
 			break
 		}
 	}
 }
 
-func (m *Market) updatePriceForOrder(o Order) {
+func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	// Find the appropriate stock
-	s := m.Stocks[o.Symbol]
-	currentBid := s.Price.Bid
-	currentOffer := s.Price.Offer
+	stock := m.Stocks[ss]
+	orders := m.Orders[ss]
 
-	if o.BuySell == BuyOrderType {
-		if currentBid == 0 {
-			s.Price.Bid = math.Max(currentBid, currentOffer)
+	maxBid := -1.0
+	minOffer := math.MaxFloat64
+
+	for _, o := range orders {
+		if o.BuySell == BuyOrderType {
+			maxBid = math.Max(o.Value, maxBid)
+		} else {
+			minOffer = math.Min(o.Value, minOffer)
 		}
-
-		if o.Value > currentBid {
-			s.Price.Bid = math.Max(o.Value, currentOffer)
-		}
-		
-	} else {
-
 	}
+
+	stock.Price.Bid = maxBid
+	stock.Price.Offer = minOffer
 }
+

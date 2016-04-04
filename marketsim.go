@@ -12,7 +12,7 @@ import (
 
 // Populate the market with some fake data
 func stubMarketStocks(m *dt.Market) {
-	m.Stocks = make(map[string]*dt.Stock)
+	//m.Stocks = make(map[dt.StockSymbol]*dt.Stock)
 
 	sym1 := dt.Stock{"AMZN", "Amazon", dt.StockPrice{568.2, 568.4}}
 	m.Stocks[sym1.Symbol] = &sym1
@@ -25,10 +25,9 @@ func stubMarketStocks(m *dt.Market) {
 }
 
 // Initialize the market
-func initializeMarket() (dt.Market, error) {
-	var market dt.Market
-	stubMarketStocks(&market)
-	market.Orders = make([]*dt.Order, 0)
+func initializeMarketWithStocks() (*dt.Market, error) {
+	var market *dt.Market = dt.InitializeMarket()
+	stubMarketStocks(market)
 
 	return market, nil
 }
@@ -59,8 +58,8 @@ func startTrading(m *dt.Market) {
 }
 
 func main() {
-	market, _ := initializeMarket()
+	market, _ := initializeMarketWithStocks()
 	fmt.Println(market)
 
-	startTrading(&market)
+	startTrading(market)
 }
