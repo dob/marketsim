@@ -41,7 +41,7 @@ func generateOrders(n int, m dt.Market, orderChannel chan *dt.Order) {
 	for i := 0; i < n; i++ {
 		// Create a new order for a random stock with a random price
 		symbols := m.Symbols()
-		orderChannel <- &dt.Order{symbols[rand.Intn(len(symbols))], dt.BuyOrderType, dt.LimitOrderType, 100, 64.5}
+		orderChannel <- &dt.Order{symbols[rand.Intn(len(symbols))], dt.BuyOrderType, dt.LimitOrderType, 100, 64.5, dt.OrderStatusOpen}
 
 		time.Sleep(time.Duration(rand.Intn(2000)) * time.Millisecond)
 	}

@@ -11,18 +11,27 @@ type Order struct {
 	OrderType OrderTypeVal
 	Shares int
 	Value float64
+	OrderStatus
 }
 
 type OrderBuySellVal int
 const (
-	BuyOrderType OrderBuySellVal = iota
-	SellOrderType OrderBuySellVal = iota
+	BuyOrderType OrderBuySellVal = iota + 1
+	SellOrderType
 )
 
 type OrderTypeVal int
 const (
-	MarketOrderType OrderTypeVal = iota
-	LimitOrderType OrderTypeVal = iota
+	MarketOrderType OrderTypeVal = iota + 1
+	LimitOrderType
+)
+
+type OrderStatus int
+const (
+	OrderStatusOpen OrderStatus = iota + 1
+	OrderStatusFilled
+	OrderStatusPartial
+	OrderStatusCancelled
 )
 
 func (o OrderTypeVal) String() string {
@@ -47,4 +56,18 @@ func (o Order) String() string {
 	}
 
 	return fmt.Sprintf("%v: %v shares of %v at $%v. %v order.", buySellTypeString, o.Shares, o. Symbol, o.Value, o.OrderType)
+}
+
+type SortedOrders []*Order
+// Sort interface functions
+func (s SortedOrders) Len() int {
+	return len(s)
+}
+
+func (s SortedOrders) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s SortedOrders) Less(i, j int) bool {
+	return s[i].Value < s[j].Value
 }

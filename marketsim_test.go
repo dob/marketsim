@@ -43,26 +43,26 @@ func TestMarketSymbols(t *testing.T) {
 }
 
 func TestOrderPrintingBuy(t *testing.T) {
-	o := dt.Order{"AMZN", dt.BuyOrderType, dt.LimitOrderType, 20, 45}
+	o := dt.Order{"AMZN", dt.BuyOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
 	if o.String() != "Buy: 20 shares of AMZN at $45. Limit order." {
 		t.Errorf("Got a bad buy string: %v.", o.String())
 	}
 }
 
 func TestOrderPrintingSell(t *testing.T) {
-	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45}
+	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
 	if o.String() != "Sell: 20 shares of AMZN at $45. Limit order." {
 		t.Errorf("Got a bad sell string: %v", o.String())
 	}
 }
 
 func TestOrderTypeString(t *testing.T) {
-	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45}
+	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
 	if o.OrderType.String() != "Limit" {
 		t.Errorf("Got a bad order type string")
 	}
 
-	o = dt.Order{"AMZN", dt.SellOrderType, dt.MarketOrderType, 20, 45}
+	o = dt.Order{"AMZN", dt.SellOrderType, dt.MarketOrderType, 20, 45, dt.OrderStatusOpen}
 	if o.OrderType.String() != "Market" {
 		t.Errorf("Got a bad order type string")
 	}
