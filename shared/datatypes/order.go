@@ -55,7 +55,11 @@ func (o Order) String() string {
 		buySellTypeString = "Sell"
 	}
 
-	return fmt.Sprintf("%v: %v shares of %v at $%v. %v order.", buySellTypeString, o.Shares, o. Symbol, o.Value, o.OrderType)
+	if o.OrderType == MarketOrderType {
+		return fmt.Sprintf("%v: %v shares of %v at market price.", buySellTypeString, o.Shares, o.Symbol)
+	} else {
+		return fmt.Sprintf("%v: %v shares of %v at $%v.", buySellTypeString, o.Shares, o.Symbol, o.Value)
+	}
 }
 
 type SortedOrders []*Order

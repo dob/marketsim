@@ -7,7 +7,7 @@ import (
 )
 
 func TestStubMarketStocks(t *testing.T) {
-	var market *dt.Market = dt.InitializeMarket()
+	var market *dt.Market = dt.NewMarket()
 	stubMarketStocks(market)
 
 	numberOfStocks := len(market.Stocks)
@@ -33,7 +33,7 @@ func TestInitializeMarketWithStocks(t *testing.T) {
 }
 
 func TestMarketSymbols(t *testing.T) {
-	market := dt.InitializeMarket()
+	market := dt.NewMarket()
 	stubMarketStocks(market)
 	syms := market.Symbols()
 
@@ -44,14 +44,14 @@ func TestMarketSymbols(t *testing.T) {
 
 func TestOrderPrintingBuy(t *testing.T) {
 	o := dt.Order{"AMZN", dt.BuyOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.String() != "Buy: 20 shares of AMZN at $45. Limit order." {
+	if o.String() != "Buy: 20 shares of AMZN at $45." {
 		t.Errorf("Got a bad buy string: %v.", o.String())
 	}
 }
 
 func TestOrderPrintingSell(t *testing.T) {
 	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.String() != "Sell: 20 shares of AMZN at $45. Limit order." {
+	if o.String() != "Sell: 20 shares of AMZN at $45." {
 		t.Errorf("Got a bad sell string: %v", o.String())
 	}
 }

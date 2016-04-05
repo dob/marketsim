@@ -6,6 +6,8 @@ import (
 	"math"
 	"sort"
 	"log"
+
+	"github.com/dob/marketsim/shared/utils"
 )
 
 // Establish the market
@@ -14,7 +16,7 @@ type Market struct {
 	Orders map[StockSymbol][]*Order
 }
 
-func InitializeMarket() *Market {
+func NewMarket() *Market {
 	m := &Market{}
 	m.Stocks = make(map[StockSymbol]*Stock)
 	m.Orders = make(map[StockSymbol][]*Order)
@@ -172,18 +174,25 @@ func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	stock := m.Stocks[ss]
 	orders := m.Orders[ss]
 
-	maxBid := 0.0
-	minOffer := math.MaxFloat64
+	maxBid := MinPrice
+	minOffer := MaxPrice
 
 	for _, o := range orders {
-		if o.BuySell == BuyOrderType {
-			maxBid = math.Max(o.Value, maxBid)
-		} else {
-			minOffer = math.Min(o.Value, minOffer)
+		// Only update for limit orders
+		if o.OrderType == LimitOrderType {
+			if o.BuySell == BuyOrderType {
+				maxBid = math.Max(o.Value, maxBid)
+			} else {
+				minOffer = math.Min(o.Value, minOffer)
+			}
 		}
 	}
 
-	stock.Price.Bid = maxBid
-	stock.Price.Offer = minOffer
+	stock.Price.Bid = utils.RoundToPlaces(maxBid, 2)
+	stock.Price.Offer = utils.RoundToPlaces(minOffer, 2)
+
+	log.Printf("Updating the price of %v to $%v - $%v", ss, maxBid, minOffer)
+	// Write the stock back into the market?
+	m.Stocks[ss] = stock
 }
 
