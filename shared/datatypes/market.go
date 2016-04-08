@@ -70,7 +70,6 @@ func (m *Market) ReceiveOrder(o *Order) error {
 
 	// Put the order into the market
 	m.Orders[o.Symbol] = append(m.Orders[o.Symbol], o)
-	//log.Printf("Adding order: %v\n", o)
 
 	// Process the order
 	m.processOrder(o)
@@ -177,8 +176,6 @@ func (m *Market) removeOrder(o *Order) {
 		if ords == o {
 			ordersForSymbol = append(ordersForSymbol[:i], ordersForSymbol[i+1:]...)
 			m.Orders[o.Symbol] = ordersForSymbol
-			//log.Printf("Removing order %v and now there are %v", o, len(ordersForSymbol))
-
 			break
 		}
 	}

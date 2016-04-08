@@ -64,7 +64,7 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		// Generate the order params
 		symbol := symbols[rand.Intn(len(symbols))]
 		buySellType := dt.OrderBuySellVal(rand.Intn(2) + 1) // Will be either buy or sell (1 or 2)
-		orderType := dt.LimitOrderType //dt.OrderTypeVal(rand.Intn(2) + 1) // Will be either market or limit (1 or 2)
+		orderType := dt.LimitOrderType // Right now we're only seeding orders as limit types to set prices
 
 		var price float64
 
@@ -94,6 +94,7 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		
 		orderChannel <- &order
 
+		// Do we want to sleep for an interval between orders?
 		//time.Sleep(time.Duration(rand.Intn(5)) * time.Millisecond)
 	}
 	close(orderChannel)
@@ -105,7 +106,6 @@ func startTrading(m *dt.Market) {
 
 	go generateOrders(NUMBER_OF_ORDERS_IN_SIMULATION, m, marketActivity)
 	for ord := range marketActivity {
-		//log.Printf("Got an order: %v\n", ord)
 		m.ReceiveOrder(ord)
 	}
 }
@@ -115,11 +115,4 @@ func main() {
 	fmt.Println(market)
 	startTrading(market)
 	fmt.Println(market)
-
-	/*fmt.Println("And the current orders are:")
-	for _, orders := range market.Orders {
-		for _, order := range orders {
-			fmt.Println(order)
-		}
-	}*/
 }
