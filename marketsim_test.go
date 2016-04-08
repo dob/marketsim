@@ -11,8 +11,8 @@ func TestStubMarketStocks(t *testing.T) {
 	stubMarketStocks(market)
 
 	numberOfStocks := len(market.Stocks)
-	if numberOfStocks != 3 {
-		t.Errorf("Was expecting 3 stocks in the market, got %v", numberOfStocks)
+	if numberOfStocks <= 1 {
+		t.Errorf("Was expecting a bunch of stocks in the market, got %v", numberOfStocks)
 	}
 }
 
@@ -37,7 +37,7 @@ func TestMarketSymbols(t *testing.T) {
 	stubMarketStocks(market)
 	syms := market.Symbols()
 
-	if len(syms) != 3 {
+	if len(syms) <= 1 {
 		t.Errorf("The symbols extraction only extracted %v symbols", len(syms))
 	}
 }

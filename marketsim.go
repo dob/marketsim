@@ -4,25 +4,44 @@ import (
 	"fmt"
 	"time"
 	"math/rand"
+	"os"
+	"encoding/csv"
 
 	"github.com/dob/marketsim/shared/datatypes"
 	"github.com/dob/marketsim/shared/utils"
 )
 
+const NUMBER_OF_ORDERS_IN_SIMULATION = 100000
+const STOCK_SEED_FILE_LOC = "data/seed/nasdaq_stocks.csv"
+
 // START SIMULATION
 
 // Populate the market with some fake data
 func stubMarketStocks(m *dt.Market) {
-	//m.Stocks = make(map[dt.StockSymbol]*dt.Stock)
+	stocks := loadStocksFromSeedFile()
+	for _, stock := range stocks {
+		m.Stocks[stock.Symbol] = stock
+	}
+}
 
-	sym1 := dt.Stock{"AMZN", "Amazon", dt.StartingPrice}
-	m.Stocks[sym1.Symbol] = &sym1
+func loadStocksFromSeedFile() []*dt.Stock {
+	stocks := make([]*dt.Stock, 0)
+	
+	csvFile, _ := os.Open(STOCK_SEED_FILE_LOC)
+	defer csvFile.Close()
 
-	sym2 := dt.Stock{"TSLA", "Tesla Motors", dt.StartingPrice}
-	m.Stocks[sym2.Symbol] = &sym2
+	reader := csv.NewReader(csvFile)
+	reader.FieldsPerRecord = -1
 
-	sym3 := dt.Stock{"TWTR", "Twitter", dt.StartingPrice}
-	m.Stocks[sym3.Symbol] = &sym3
+	rawCSVData, _ := reader.ReadAll()
+
+	for _, each := range rawCSVData {
+		sym, name := each[0], each[1]
+		fmt.Printf("adding %v: %v\n", sym, name)
+		stocks = append(stocks, &dt.Stock{dt.StockSymbol(sym), name, dt.StartingPrice})
+	}
+
+	return stocks
 }
 
 // Initialize the market
@@ -48,7 +67,9 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		orderType := dt.LimitOrderType //dt.OrderTypeVal(rand.Intn(2) + 1) // Will be either market or limit (1 or 2)
 
 		var price float64
-		priceForSymbol := m.Stocks[symbol].Price
+
+		priceForSymbol := m.GetPriceForSymbol(symbol)
+		
 		if orderType == dt.LimitOrderType {
 			if ((priceForSymbol.Bid == dt.StartingPrice.Bid) || (priceForSymbol.Offer == dt.StartingPrice.Offer)) {
 				// Go pretty random unless we have both bid and ask
@@ -73,7 +94,7 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		
 		orderChannel <- &order
 
-		time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
+		//time.Sleep(time.Duration(rand.Intn(5)) * time.Millisecond)
 	}
 	close(orderChannel)
 }
@@ -82,7 +103,7 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 func startTrading(m *dt.Market) {
 	marketActivity := make(chan *dt.Order)
 
-	go generateOrders(1000, m, marketActivity)
+	go generateOrders(NUMBER_OF_ORDERS_IN_SIMULATION, m, marketActivity)
 	for ord := range marketActivity {
 		//log.Printf("Got an order: %v\n", ord)
 		m.ReceiveOrder(ord)
@@ -94,4 +115,11 @@ func main() {
 	fmt.Println(market)
 	startTrading(market)
 	fmt.Println(market)
+
+	/*fmt.Println("And the current orders are:")
+	for _, orders := range market.Orders {
+		for _, order := range orders {
+			fmt.Println(order)
+		}
+	}*/
 }

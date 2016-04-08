@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math"
 	"sort"
-	"log"
+	"sync"
 
 	"github.com/dob/marketsim/shared/utils"
 )
@@ -14,6 +14,8 @@ import (
 type Market struct {
 	Stocks map[StockSymbol]*Stock
 	Orders map[StockSymbol][]*Order
+
+	mux sync.Mutex   // Make the market threadsafe
 }
 
 func NewMarket() *Market {
@@ -45,9 +47,22 @@ func (m *Market) Symbols() []StockSymbol {
 	return keys	
 }
 
+func (m *Market) GetPriceForSymbol(s StockSymbol) StockPrice {
+	m.mux.Lock()
+	price := m.Stocks[s].Price
+	m.mux.Unlock()
+	
+	return price
+}
+
 var InvalidOrder = errors.New("Invalid order")
 
 func (m *Market) ReceiveOrder(o *Order) error {
+	// Make sure that when we're updating the market nothing else
+	// can read from the market
+	m.mux.Lock()
+	defer m.mux.Unlock()
+	
 	// Check for errors
 	if o.Shares < 1 {
 		return InvalidOrder
@@ -55,7 +70,7 @@ func (m *Market) ReceiveOrder(o *Order) error {
 
 	// Put the order into the market
 	m.Orders[o.Symbol] = append(m.Orders[o.Symbol], o)
-	log.Printf("Adding order: %v\n", o)
+	//log.Printf("Adding order: %v\n", o)
 
 	// Process the order
 	m.processOrder(o)
@@ -162,7 +177,7 @@ func (m *Market) removeOrder(o *Order) {
 		if ords == o {
 			ordersForSymbol = append(ordersForSymbol[:i], ordersForSymbol[i+1:]...)
 			m.Orders[o.Symbol] = ordersForSymbol
-			log.Printf("Removing order %v and now there are %v", o, len(ordersForSymbol))
+			//log.Printf("Removing order %v and now there are %v", o, len(ordersForSymbol))
 
 			break
 		}
@@ -191,8 +206,9 @@ func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	stock.Price.Bid = utils.RoundToPlaces(maxBid, 2)
 	stock.Price.Offer = utils.RoundToPlaces(minOffer, 2)
 
-	log.Printf("Updating the price of %v to $%v - $%v", ss, maxBid, minOffer)
-	// Write the stock back into the market?
+	//log.Printf("Updating the price of %v to $%v - $%v", ss, maxBid, minOffer)
+	// Write the stock back into the market? why do you have to do this
+	// since stock should already be a pointer to the stock struct
 	m.Stocks[ss] = stock
 }
 
