@@ -17,7 +17,7 @@ const STOCK_SEED_FILE_LOC = "data/seed/nasdaq_stocks.csv"
 // START SIMULATION
 
 // Populate the market with some fake data
-func stubMarketStocks(m *dt.Market) {
+func stubMarketStocks(m *dt.Market)    {
 	stocks := loadStocksFromSeedFile()
 	for _, stock := range stocks {
 		m.Stocks[stock.Symbol] = stock
