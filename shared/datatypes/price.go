@@ -2,12 +2,12 @@ package dt
 
 // Represent the current price of a stock
 type StockPrice struct {
-	Bid float64
+	Bid   float64
 	Offer float64
 }
 
 func (sp StockPrice) MidPrice() float64 {
-	if ((sp.Bid == StartingPrice.Bid) && (sp.Offer == StartingPrice.Offer)) {
+	if (sp.Bid == StartingPrice.Bid) && (sp.Offer == StartingPrice.Offer) {
 		return 0
 	} else if sp.Bid == MinPrice {
 		return MaxPrice

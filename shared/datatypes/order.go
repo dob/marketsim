@@ -6,27 +6,30 @@ import (
 
 // Represents an order to buy or sell
 type Order struct {
-	Symbol StockSymbol
-	BuySell OrderBuySellVal
+	Symbol    StockSymbol
+	BuySell   OrderBuySellVal
 	OrderType OrderTypeVal
-	Shares int
-	Value float64
+	Shares    int
+	Value     float64
 	OrderStatus
 }
 
 type OrderBuySellVal int
+
 const (
 	BuyOrderType OrderBuySellVal = iota + 1
 	SellOrderType
 )
 
 type OrderTypeVal int
+
 const (
 	MarketOrderType OrderTypeVal = iota + 1
 	LimitOrderType
 )
 
 type OrderStatus int
+
 const (
 	OrderStatusOpen OrderStatus = iota + 1
 	OrderStatusFilled
@@ -45,7 +48,6 @@ func (o OrderTypeVal) String() string {
 	}
 }
 
-
 func (o Order) String() string {
 	var buySellTypeString string
 
@@ -63,6 +65,7 @@ func (o Order) String() string {
 }
 
 type SortedOrders []*Order
+
 // Sort interface functions
 func (s SortedOrders) Len() int {
 	return len(s)

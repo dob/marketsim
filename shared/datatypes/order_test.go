@@ -11,15 +11,13 @@ func TestOrderSorting(t *testing.T) {
 		&Order{"WLB", BuyOrderType, MarketOrderType, 60, 2.0, OrderStatusOpen}}
 
 	sort.Sort(SortedOrders(orders))
-	if (orders[0].Symbol != "WLB" || orders[1].Symbol != "AMZN" || orders[2].Symbol != "TSLA") {
+	if orders[0].Symbol != "WLB" || orders[1].Symbol != "AMZN" || orders[2].Symbol != "TSLA" {
 		t.Errorf("Sort did not work.")
 	}
 
 	sort.Sort(sort.Reverse(SortedOrders(orders)))
 
-	if (orders[0].Symbol != "TSLA" || orders[1].Symbol != "AMZN" || orders[2].Symbol != "WLB") {
+	if orders[0].Symbol != "TSLA" || orders[1].Symbol != "AMZN" || orders[2].Symbol != "WLB" {
 		t.Errorf("Sort reverse did not work: %v", orders)
 	}
 }
-
-

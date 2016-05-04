@@ -15,7 +15,7 @@ type Market struct {
 	Stocks map[StockSymbol]*Stock
 	Orders map[StockSymbol][]*Order
 
-	mux sync.Mutex   // Make the market threadsafe
+	mux sync.Mutex // Make the market threadsafe
 }
 
 func NewMarket() *Market {
@@ -44,14 +44,14 @@ func (m *Market) Symbols() []StockSymbol {
 	for k, _ := range m.Stocks {
 		keys = append(keys, k)
 	}
-	return keys	
+	return keys
 }
 
 func (m *Market) GetPriceForSymbol(s StockSymbol) StockPrice {
 	m.mux.Lock()
 	price := m.Stocks[s].Price
 	m.mux.Unlock()
-	
+
 	return price
 }
 
@@ -62,7 +62,7 @@ func (m *Market) ReceiveOrder(o *Order) error {
 	// can read from the market
 	m.mux.Lock()
 	defer m.mux.Unlock()
-	
+
 	// Check for errors
 	if o.Shares < 1 {
 		return InvalidOrder
@@ -73,7 +73,7 @@ func (m *Market) ReceiveOrder(o *Order) error {
 
 	// Process the order
 	m.processOrder(o)
-	
+
 	// Update the price of the stock represented by the order o
 	m.updatePriceForSymbol(o.Symbol)
 	return nil
@@ -100,7 +100,7 @@ func (m *Market) processLimitOrder(o *Order) {
 			// leave this offer around
 			break
 		}
-		
+
 		if sharesOutstanding <= candidateOrder.Shares {
 			// fullfill the full order and part of the candidate order
 			m.fullfillOrder(o, sharesOutstanding, candidateOrder.Value)
@@ -113,7 +113,7 @@ func (m *Market) processLimitOrder(o *Order) {
 			m.fullfillOrder(candidateOrder, candidateOrder.Shares, candidateOrder.Value)
 			sharesOutstanding -= candidateOrder.Shares
 		}
-	}	
+	}
 }
 
 func (m *Market) processMarketOrder(o *Order) {
@@ -208,4 +208,3 @@ func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	// since stock should already be a pointer to the stock struct
 	m.Stocks[ss] = stock
 }
-

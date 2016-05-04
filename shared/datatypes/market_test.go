@@ -1,8 +1,8 @@
 package dt
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 var m *Market
@@ -47,7 +47,7 @@ func TestReceiveOrdersDifferentStocks(t *testing.T) {
 	m.ReceiveOrder(&order)
 	m.ReceiveOrder(&order2)
 
-	if (len(m.Orders) != 2) {
+	if len(m.Orders) != 2 {
 		t.Errorf("Orders were clearly not received as length was %v", len(m.Orders))
 	}
 }
@@ -59,7 +59,7 @@ func TestReceiveOrdersSameStocks(t *testing.T) {
 	m.ReceiveOrder(&order)
 	m.ReceiveOrder(&order2)
 
-	if (len(m.Orders["AMZN"]) != 2) {
+	if len(m.Orders["AMZN"]) != 2 {
 		t.Errorf("Orders were clearly not received as length was %v", len(m.Orders))
 	}
 
@@ -93,7 +93,7 @@ func TestIfOrderWillProcess(t *testing.T) {
 	if len(amznOrders) != 0 {
 		t.Errorf("Orders should have been processed and removed but there are %v", len(amznOrders))
 	}
-		
+
 	if order.OrderStatus != OrderStatusFilled {
 		t.Errorf("Order should have been filled but was not")
 	}

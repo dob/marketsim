@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
-	"time"
 	"math/rand"
 	"os"
-	"encoding/csv"
+	"time"
 
 	"github.com/dob/marketsim/shared/datatypes"
 	"github.com/dob/marketsim/shared/utils"
@@ -26,7 +26,7 @@ func stubMarketStocks(m *dt.Market) {
 
 func loadStocksFromSeedFile() []*dt.Stock {
 	stocks := make([]*dt.Stock, 0)
-	
+
 	csvFile, _ := os.Open(STOCK_SEED_FILE_LOC)
 	defer csvFile.Close()
 
@@ -64,21 +64,21 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		// Generate the order params
 		symbol := symbols[rand.Intn(len(symbols))]
 		buySellType := dt.OrderBuySellVal(rand.Intn(2) + 1) // Will be either buy or sell (1 or 2)
-		orderType := dt.LimitOrderType // Right now we're only seeding orders as limit types to set prices
+		orderType := dt.LimitOrderType                      // Right now we're only seeding orders as limit types to set prices
 
 		var price float64
 
 		priceForSymbol := m.GetPriceForSymbol(symbol)
-		
+
 		if orderType == dt.LimitOrderType {
-			if ((priceForSymbol.Bid == dt.StartingPrice.Bid) || (priceForSymbol.Offer == dt.StartingPrice.Offer)) {
+			if (priceForSymbol.Bid == dt.StartingPrice.Bid) || (priceForSymbol.Offer == dt.StartingPrice.Offer) {
 				// Go pretty random unless we have both bid and ask
 				price = float64(rand.Intn(100)) + rand.Float64()
 			} else {
 				// Randomly choose positive or negative price fluctuation
 				// within 5% of the current price
-				priceDelta := float64(priceForSymbol.MidPrice() * 0.05) * rand.Float64()
-				
+				priceDelta := float64(priceForSymbol.MidPrice()*0.05) * rand.Float64()
+
 				if rand.Intn(2) == 0 {
 					price = priceForSymbol.Bid + priceDelta
 				} else {
@@ -88,10 +88,10 @@ func generateOrders(n int, m *dt.Market, orderChannel chan *dt.Order) {
 		}
 
 		price = utils.RoundToPlaces(price, 2)
-		shares := (rand.Intn(10) + 1) * 100  // Start with 100x share lots
+		shares := (rand.Intn(10) + 1) * 100 // Start with 100x share lots
 
-		order := dt.Order{symbol, buySellType, orderType, shares, price, dt.OrderStatusOpen}			
-		
+		order := dt.Order{symbol, buySellType, orderType, shares, price, dt.OrderStatusOpen}
+
 		orderChannel <- &order
 
 		// Do we want to sleep for an interval between orders?

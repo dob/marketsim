@@ -19,7 +19,7 @@ func TestStubMarketStocks(t *testing.T) {
 func TestInitializeMarketWithStocks(t *testing.T) {
 	market, err := initializeMarketWithStocks()
 
-	if (err != nil) {
+	if err != nil {
 		t.Errorf("Got an error creating the market: %v", err)
 	}
 
