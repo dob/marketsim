@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"time"
 	"path/filepath"
+	"time"
 
-	"github.com/dob/marketsim"
+	ms "github.com/dob/marketsim"
 	"github.com/dob/marketsim/utils"
 )
 
@@ -18,15 +18,15 @@ const STOCK_SEED_FILE_LOC = "data/seed/nasdaq_stocks.csv"
 // START SIMULATION
 
 // Populate the market with some fake data
-func stubMarketStocks(m *marketsim.Market) {
+func stubMarketStocks(m *ms.Market) {
 	stocks := loadStocksFromSeedFile()
 	for _, stock := range stocks {
 		m.Stocks[stock.Symbol] = stock
 	}
 }
 
-func loadStocksFromSeedFile() []*marketsim.Stock {
-	stocks := make([]*marketsim.Stock, 0)
+func loadStocksFromSeedFile() []*ms.Stock {
+	stocks := make([]*ms.Stock, 0)
 
 	// Find path for seed file relative to where we're at
 	basePath := filepath.Join(os.Getenv("GOPATH"), "src", "github.com", "dob", "marketsim")
@@ -41,22 +41,22 @@ func loadStocksFromSeedFile() []*marketsim.Stock {
 	for _, each := range rawCSVData {
 		sym, name := each[0], each[1]
 		fmt.Printf("adding %v: %v\n", sym, name)
-		stocks = append(stocks, &marketsim.Stock{marketsim.StockSymbol(sym), name, marketsim.StartingPrice})
+		stocks = append(stocks, &ms.Stock{ms.StockSymbol(sym), name, ms.StartingPrice})
 	}
 
 	return stocks
 }
 
 // Initialize the market
-func initializeMarketWithStocks() (*marketsim.Market, error) {
-	var market *marketsim.Market = marketsim.NewMarket()
+func initializeMarketWithStocks() (*ms.Market, error) {
+	var market *ms.Market = ms.NewMarket()
 	stubMarketStocks(market)
 
 	return market, nil
 }
 
 //Randomly generate n orders and sleep for 0-2 seconds in between
-func generateOrders(n int, m *marketsim.Market, orderChannel chan *marketsim.Order) {
+func generateOrders(n int, m *ms.Market, orderChannel chan *ms.Order) {
 	// Randomly sleep between orders
 	rand.Seed(time.Now().UnixNano())
 
@@ -66,15 +66,15 @@ func generateOrders(n int, m *marketsim.Market, orderChannel chan *marketsim.Ord
 
 		// Generate the order params
 		symbol := symbols[rand.Intn(len(symbols))]
-		buySellType := marketsim.OrderBuySellVal(rand.Intn(2) + 1) // Will be either buy or sell (1 or 2)
-		orderType := marketsim.LimitOrderType                      // Right now we're only seeding orders as limit types to set prices
+		buySellType := ms.OrderBuySellVal(rand.Intn(2) + 1) // Will be either buy or sell (1 or 2)
+		orderType := ms.LimitOrderType                      // Right now we're only seeding orders as limit types to set prices
 
 		var price float64
 
 		priceForSymbol := m.GetPriceForSymbol(symbol)
 
-		if orderType == marketsim.LimitOrderType {
-			if (priceForSymbol.Bid == marketsim.StartingPrice.Bid) || (priceForSymbol.Offer == marketsim.StartingPrice.Offer) {
+		if orderType == ms.LimitOrderType {
+			if (priceForSymbol.Bid == ms.StartingPrice.Bid) || (priceForSymbol.Offer == ms.StartingPrice.Offer) {
 				// Go pretty random unless we have both bid and ask
 				price = float64(rand.Intn(100)) + rand.Float64()
 			} else {
@@ -93,7 +93,7 @@ func generateOrders(n int, m *marketsim.Market, orderChannel chan *marketsim.Ord
 		price = utils.RoundToPlaces(price, 2)
 		shares := (rand.Intn(10) + 1) * 100 // Start with 100x share lots
 
-		order := marketsim.Order{symbol, buySellType, orderType, shares, price, marketsim.OrderStatusOpen}
+		order := ms.Order{symbol, buySellType, orderType, shares, price, ms.OrderStatusOpen}
 
 		orderChannel <- &order
 
@@ -104,8 +104,8 @@ func generateOrders(n int, m *marketsim.Market, orderChannel chan *marketsim.Ord
 }
 
 // Simulate the start of trading
-func startTrading(m *marketsim.Market) {
-	marketActivity := make(chan *marketsim.Order)
+func startTrading(m *ms.Market) {
+	marketActivity := make(chan *ms.Order)
 
 	go generateOrders(NUMBER_OF_ORDERS_IN_SIMULATION, m, marketActivity)
 	for ord := range marketActivity {

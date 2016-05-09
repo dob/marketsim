@@ -18,22 +18,22 @@ The easiest way to install marketsim is to run `go get github.com/dob/marketsim`
 To use marketsim, you first have to instantiate a market and add at least one stock to it.
 
 ``` go
-import "github.com/dob/marketsim"
+import ms "github.com/dob/marketsim"
 
-var market *marketsim.Market = marketsim.NewMarket()
+var market *ms.Market = ms.NewMarket()
 
 // Add a stock or two.
 // Lets add a symbols called AMZN and TSLA starting with the default price
-market.stocks[marketsim.StockSymbol("AMZN")] = &marketsim.Stock{marketsim.StockSymbol("AMZN"), "Amazon", marketsim.StartingPrice}
-market.stocks[marketsim.StockSymbol("TSLA")] = &marketsim.Stock{marketsim.StockSymbol("TSLA"), "Tesla", marketsim.StartingPrice}
+market.stocks[ms.StockSymbol("AMZN")] = &ms.Stock{ms.StockSymbol("AMZN"), "Amazon", ms.StartingPrice}
+market.stocks[ms.StockSymbol("TSLA")] = &ms.Stock{ms.StockSymbol("TSLA"), "Tesla", ms.StartingPrice}
 ```
 
 Marketsim currently supports limit orders. Lets submit a few 100 share limit 
 orders for AMZN.
 
 ``` go
-buyOrder := marketsim.Order{"AMZN", marketsim.BuyOrderType, marketsim.LimitOrderType, 100, 645.20, marketsim.OrderStatusOpen}
-sellOrder := marketsim.Order{"AMZN", marketsim.SellOrderType, marketsim.LimitOrderType, 100, 646.10, marketsim.OrderStatusOpen}
+buyOrder := ms.Order{"AMZN", ms.BuyOrderType, ms.LimitOrderType, 100, 645.20, ms.OrderStatusOpen}
+sellOrder := ms.Order{"AMZN", ms.SellOrderType, ms.LimitOrderType, 100, 646.10, ms.OrderStatusOpen}
 
 market.ReceiveOrder(buyOrder)
 market.ReceiveOrder(sellOrder)
@@ -55,7 +55,7 @@ If an order comes in that crosses the spread, the market will process the order,
 update the order book, and prices accordingly.
 
 ``` go
-crossSpreadOrder := marketsim.Order{"AMZN", marketsim.SellOrderTYpe, marketsim.LimitOrderType, 50, 645.20, marketsim.OrderStatusOpen}
+crossSpreadOrder := ms.Order{"AMZN", ms.SellOrderTYpe, ms.LimitOrderType, 50, 645.20, ms.OrderStatusOpen}
 /// This order will cross the spread to the first submited sell order, and 50 shares will be taken off the OrderBook
 ```
 
