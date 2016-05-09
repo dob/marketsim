@@ -1,69 +1,104 @@
-package main
+package marketsim
 
 import (
+	"os"
 	"testing"
-
-	"github.com/dob/marketsim/shared/datatypes"
 )
 
-func TestStubMarketStocks(t *testing.T) {
-	var market *dt.Market = dt.NewMarket()
-	stubMarketStocks(market)
+var m *Market
 
-	numberOfStocks := len(market.Stocks)
-	if numberOfStocks <= 1 {
-		t.Errorf("Was expecting a bunch of stocks in the market, got %v", numberOfStocks)
-	}
+func TestMain(testingm *testing.M) {
+	setup()
+
+	retval := testingm.Run()
+
+	os.Exit(retval)
 }
 
-func TestInitializeMarketWithStocks(t *testing.T) {
-	market, err := initializeMarketWithStocks()
+func setup() {
+	m = &Market{}
+	m.Stocks = make(map[StockSymbol]*Stock)
+	m.Orders = make(map[StockSymbol][]*Order)
+	m.Stocks["AMZN"] = &Stock{"AMZN", "Amazon", StockPrice{}}
+	m.Stocks["TSLA"] = &Stock{"TSLA", "Tesla", StockPrice{}}
+	m.Stocks["TWTR"] = &Stock{"TWTR", "Twitter", StockPrice{}}
+}
+
+func TestReceiveOrderNegativeShares(t *testing.T) {
+	o := Order{"AMZN", BuyOrderType, MarketOrderType, -2, 23.0, OrderStatusOpen}
+	err := m.ReceiveOrder(&o)
+
+	if err == nil {
+		t.Errorf("ReceiveOrder didn't fail on negative shares")
+	}
+
+	o1 := Order{"TSLA", BuyOrderType, MarketOrderType, 23, 23.0, OrderStatusOpen}
+	err = m.ReceiveOrder(&o1)
 
 	if err != nil {
-		t.Errorf("Got an error creating the market: %v", err)
-	}
-
-	if &market == nil {
-		t.Errorf("InitializeMarket returned nil")
-	}
-
-	if len(market.Orders) != 0 {
-		t.Errorf("Market orders didn't get initialized.")
+		t.Errorf("ReceiveOrder failed on a valid order")
 	}
 }
 
-func TestMarketSymbols(t *testing.T) {
-	market := dt.NewMarket()
-	stubMarketStocks(market)
-	syms := market.Symbols()
+func TestReceiveOrdersDifferentStocks(t *testing.T) {
+	setup()
+	order := Order{"AMZN", BuyOrderType, LimitOrderType, 100, 595.0, OrderStatusOpen}
+	order2 := Order{"TSLA", SellOrderType, LimitOrderType, 100, 596.50, OrderStatusOpen}
+	m.ReceiveOrder(&order)
+	m.ReceiveOrder(&order2)
 
-	if len(syms) <= 1 {
-		t.Errorf("The symbols extraction only extracted %v symbols", len(syms))
+	if len(m.Orders) != 2 {
+		t.Errorf("Orders were clearly not received as length was %v", len(m.Orders))
 	}
 }
 
-func TestOrderPrintingBuy(t *testing.T) {
-	o := dt.Order{"AMZN", dt.BuyOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.String() != "Buy: 20 shares of AMZN at $45." {
-		t.Errorf("Got a bad buy string: %v.", o.String())
+func TestReceiveOrdersSameStocks(t *testing.T) {
+	setup()
+	order := Order{"AMZN", BuyOrderType, LimitOrderType, 100, 595.0, OrderStatusOpen}
+	order2 := Order{"AMZN", SellOrderType, LimitOrderType, 100, 596.50, OrderStatusOpen}
+	m.ReceiveOrder(&order)
+	m.ReceiveOrder(&order2)
+
+	if len(m.Orders["AMZN"]) != 2 {
+		t.Errorf("Orders were clearly not received as length was %v", len(m.Orders))
+	}
+
+}
+
+func TestSetPrices(t *testing.T) {
+	setup()
+	order := Order{"AMZN", BuyOrderType, LimitOrderType, 100, 595.0, OrderStatusOpen}
+	order2 := Order{"AMZN", SellOrderType, LimitOrderType, 100, 596.50, OrderStatusOpen}
+	m.ReceiveOrder(&order)
+	m.ReceiveOrder(&order2)
+
+	AMZNPrice := m.Stocks["AMZN"].Price
+	if AMZNPrice.Bid != 595.0 {
+		t.Errorf("Bid price was supposed to be 595 but instead was %v", AMZNPrice.Bid)
+	}
+
+	if AMZNPrice.Offer != 596.50 {
+		t.Errorf("Offer price was supposed to be 596.5 but instead was %v", AMZNPrice.Bid)
 	}
 }
 
-func TestOrderPrintingSell(t *testing.T) {
-	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.String() != "Sell: 20 shares of AMZN at $45." {
-		t.Errorf("Got a bad sell string: %v", o.String())
-	}
-}
+func TestIfOrderWillProcess(t *testing.T) {
+	setup()
+	order := Order{"AMZN", BuyOrderType, LimitOrderType, 100, 595.0, OrderStatusOpen}
+	order2 := Order{"AMZN", SellOrderType, LimitOrderType, 100, 595.0, OrderStatusOpen}
+	m.ReceiveOrder(&order)
+	m.ReceiveOrder(&order2)
 
-func TestOrderTypeString(t *testing.T) {
-	o := dt.Order{"AMZN", dt.SellOrderType, dt.LimitOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.OrderType.String() != "Limit" {
-		t.Errorf("Got a bad order type string")
+	amznOrders := m.Orders["AMZN"]
+	if len(amznOrders) != 0 {
+		t.Errorf("Orders should have been processed and removed but there are %v", len(amznOrders))
 	}
 
-	o = dt.Order{"AMZN", dt.SellOrderType, dt.MarketOrderType, 20, 45, dt.OrderStatusOpen}
-	if o.OrderType.String() != "Market" {
-		t.Errorf("Got a bad order type string")
+	if order.OrderStatus != OrderStatusFilled {
+		t.Errorf("Order should have been filled but was not")
+	}
+
+	if order2.OrderStatus != OrderStatusFilled {
+		t.Errorf("Order should have been filled but was not")
 	}
 }

@@ -1,4 +1,4 @@
-package dt
+package marketsim
 
 // Represent the current price of a stock
 type StockPrice struct {
