@@ -24,16 +24,16 @@ var market *ms.Market = ms.NewMarket()
 
 // Add a stock or two.
 // Lets add a symbols called AMZN and TSLA starting with the default price
-market.stocks[ms.StockSymbol("AMZN")] = &ms.Stock{ms.StockSymbol("AMZN"), "Amazon", ms.StartingPrice}
-market.stocks[ms.StockSymbol("TSLA")] = &ms.Stock{ms.StockSymbol("TSLA"), "Tesla", ms.StartingPrice}
+market.Stocks[ms.StockSymbol("AMZN")] = &ms.Stock{ms.StockSymbol("AMZN"), "Amazon", ms.StartingPrice}
+market.Stocks[ms.StockSymbol("TSLA")] = &ms.Stock{ms.StockSymbol("TSLA"), "Tesla", ms.StartingPrice}
 ```
 
 Marketsim currently supports limit orders. Lets submit a few 100 share limit 
 orders for AMZN.
 
 ``` go
-buyOrder := ms.Order{"AMZN", ms.BuyOrderType, ms.LimitOrderType, 100, 645.20, ms.OrderStatusOpen}
-sellOrder := ms.Order{"AMZN", ms.SellOrderType, ms.LimitOrderType, 100, 646.10, ms.OrderStatusOpen}
+buyOrder := &ms.Order{"AMZN", ms.BuyOrderType, ms.LimitOrderType, 100, 645.20, ms.OrderStatusOpen}
+sellOrder := &ms.Order{"AMZN", ms.SellOrderType, ms.LimitOrderType, 100, 646.10, ms.OrderStatusOpen}
 
 market.ReceiveOrder(buyOrder)
 market.ReceiveOrder(sellOrder)
@@ -55,8 +55,11 @@ If an order comes in that crosses the spread, the market will process the order,
 update the order book, and prices accordingly.
 
 ``` go
-crossSpreadOrder := ms.Order{"AMZN", ms.SellOrderTYpe, ms.LimitOrderType, 50, 645.20, ms.OrderStatusOpen}
-/// This order will cross the spread to the first submited sell order, and 50 shares will be taken off the OrderBook
+crossSpreadOrder := ms.Order{"AMZN", ms.SellOrderType,
+ms.LimitOrderType, 50, 645.20, ms.OrderStatusOpen}
+market.ReceiveOrder(crossSpreadOrder)
+
+// This order will cross the spread to the first submited sell order, and 50 shares will be taken off the OrderBook
 ```
 
 ## To-Do
