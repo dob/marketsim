@@ -203,7 +203,6 @@ func (m *Market) updatePriceForSymbol(ss StockSymbol) {
 	stock.Price.Bid = utils.RoundToPlaces(maxBid, 2)
 	stock.Price.Offer = utils.RoundToPlaces(minOffer, 2)
 
-	//log.Printf("Updating the price of %v to $%v - $%v", ss, maxBid, minOffer)
 	// Write the stock back into the market? why do you have to do this
 	// since stock should already be a pointer to the stock struct
 	m.Stocks[ss] = stock
