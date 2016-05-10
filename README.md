@@ -62,8 +62,30 @@ market.ReceiveOrder(crossSpreadOrder)
 // This order will cross the spread to the first submited sell order, and 50 shares will be taken off the OrderBook
 ```
 
+## Examples
+
+### Simple example
+
+The first example reproduces the walkthrough in this readme. It's a
+simple demonstration of creating a market, adding some stocks, and 
+submitting a couple orders.
+
+`go run cmd/marketsim/examples/simple_example.go`
+
+[Simple Example](https://github.com/dob/marketsim/blob/master/cmd/marketsim/examples/simple_example.go)
+
+### Nasdaq with 100,000 random orders
+
+The second example is more complex. It instantiates all the stocks on 
+the Nasdaq, and begins generating orders randomly at first, and then
+within 5% of the current price range. Orders are processed as they
+enter the book. At the end it prints the entire market.
+
+`go run cmd/marketsim/examples/full_nasdaq_sim.go`
+
+[Full Nasdaq Simulation](https://github.com/dob/marketsim/blob/master/cmd/marketsim/examples/full_nasdaq_sim.go)
+
 ## To-Do
 
-1. Move the executable into an examples/cmd directory as it's not really anything other than a demonstration of usages
 1. Support market orders and more sensible defaults.
 1. Better error reporting
