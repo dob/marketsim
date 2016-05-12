@@ -5,7 +5,9 @@ import (
 	ms "github.com/dob/marketsim"
 )
 
-func main() {
+type SimpleExample struct{}
+
+func (s SimpleExample) run() {
 	var market *ms.Market = ms.NewMarket()
 
 	// Add a stock or two.
