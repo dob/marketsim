@@ -113,7 +113,10 @@ func startTrading(m *ms.Market) {
 	}
 }
 
-func main() {
+// implements the Example interface
+type FullNasdaqSim struct{}
+
+func (f FullNasdaqSim) run() {
 	market, _ := initializeMarketWithStocks()
 	fmt.Println(market)
 	startTrading(market)

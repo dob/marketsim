@@ -7,7 +7,7 @@ facilitated by the prices and quantities set in the limit orders. The bid/ask
 spread for the stock will be updated according to the outstanding orders
 on the order book.
 
-*(This is a work in progress and isn't ready for anything other than experimenation yet).*
+*(This is a work in progress and only supports limit orders at the moment)*
 
 ## Installation
 
@@ -70,7 +70,9 @@ The first example reproduces the walkthrough in this readme. It's a
 simple demonstration of creating a market, adding some stocks, and 
 submitting a couple orders.
 
-`go run cmd/marketsim/examples/simple_example.go`
+`cd cmd/marketsim/examples`
+`go build`
+`./examples`
 
 [Simple Example](https://github.com/dob/marketsim/blob/master/cmd/marketsim/examples/simple_example.go)
 
@@ -81,7 +83,9 @@ the Nasdaq, and begins generating orders randomly at first, and then
 within 5% of the current price range. Orders are processed as they
 enter the book. At the end it prints the entire market.
 
-`go run cmd/marketsim/examples/full_nasdaq_sim.go`
+`cd cmd/marketsim/examples`
+`go build`
+`./examples -example=full`
 
 [Full Nasdaq Simulation](https://github.com/dob/marketsim/blob/master/cmd/marketsim/examples/full_nasdaq_sim.go)
 
